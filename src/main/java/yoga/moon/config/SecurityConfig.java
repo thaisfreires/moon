@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -24,6 +26,8 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/login").permitAll()
+                .requestMatchers("/error").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/", "/public").permitAll()
@@ -32,29 +36,28 @@ public class SecurityConfig {
             )
             
             .csrf(csrf -> csrf.disable())
-            .headers(headers -> headers.frameOptions().disable())
+            .headers(headers -> headers
+            .frameOptions(frame -> frame.sameOrigin())
+            )
             .formLogin(withDefaults())
             .logout(withDefaults());
 
         return http.build();
     }
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return passwordEncoder();
-    }
+
 
     @Bean
     public UserDetailsService userDetailsService() {
-        String adminPassword = System.getenv("ADMIN_PASSWORD");
+
         UserDetails admin = User.builder()
                 .username("admin")
-                .password(passwordEncoder().encode(adminPassword))
+                .password("admin123")
                 .roles("ADMIN")
                 .build();
 
         UserDetails user = User.builder()
                 .username("user")
-                .password(passwordEncoder().encode("user123"))
+                .password("user123")
                 .roles("USER")
                 .build();
 

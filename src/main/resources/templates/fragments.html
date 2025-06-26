@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Fragments</title>
+</head>
+<body>
+
+    <!-- Navbar fragment -->
+    <div th:fragment="navbar">
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: transparent;">
+            <div class="container">
+                <a class="navbar-brand" href="/" style="color: #7b2cbf; font-weight: bold;">YogaPlace</a>
+                <div class="d-flex">
+                    <a class="btn btn-outline-primary" href="/login">Login</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+</body>
+</html>
