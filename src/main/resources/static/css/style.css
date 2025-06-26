@@ -1,0 +1,32 @@
+/* style.css */
+
+/* Light purple background for the whole page */
+body {
+    background-color: #f3e8ff; /* soft lavender */
+    font-family: 'Segoe UI', sans-serif;
+    color: #333;
+}
+
+/* Purple header text */
+h1, h2, h3 {
+    color: #5e60ce; /* deeper purple */
+}
+
+/* Customize Bootstrap primary button to match theme */
+.btn-primary {
+    background-color: #7b2cbf;
+    border-color: #7b2cbf;
+}
+
+.btn-primary:hover {
+    background-color: #5a189a;
+    border-color: #5a189a;
+}
+
+/* Optional: card or form styling */
+.form-container, .card {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
