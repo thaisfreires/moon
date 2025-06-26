@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import yoga.moon.util.JwtUtil;
 
-
 @RestController
 public class AuthController {
 
