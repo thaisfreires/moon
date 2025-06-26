@@ -1,0 +1,12 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Moon Yoga</title>
+</head>
+<body>
+    <h1>Bem-vindo ao Moon Yoga 🌙</h1>
+    <p th:text="${#authentication.name} + ', você está logado como ' + #authentication.authorities}"></p>
+    <a href="/logout">Logout</a>
+</body>
+</html>

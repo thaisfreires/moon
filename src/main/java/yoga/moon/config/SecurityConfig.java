@@ -26,7 +26,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/login").permitAll()
+                // .requestMatchers("/login").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
@@ -39,25 +39,30 @@ public class SecurityConfig {
             .headers(headers -> headers
             .frameOptions(frame -> frame.sameOrigin())
             )
-            .formLogin(withDefaults())
+            .formLogin(login -> login
+            .defaultSuccessUrl("/", true)
+            .permitAll())
             .logout(withDefaults());
 
         return http.build();
     }
-
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
-    public UserDetailsService userDetailsService() {
+    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
 
         UserDetails admin = User.builder()
                 .username("admin")
-                .password("admin123")
+                .password(encoder.encode("admin123"))
                 .roles("ADMIN")
                 .build();
 
         UserDetails user = User.builder()
                 .username("user")
-                .password("user123")
+                .password(encoder.encode("user123"))
                 .roles("USER")
                 .build();
 

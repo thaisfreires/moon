@@ -2,7 +2,7 @@
 
 /* Light purple background for the whole page */
 body {
-    background-color: #f3e8ff; /* soft lavender */
+    background-color: #f3e8ff44; /* soft lavender */
     font-family: 'Segoe UI', sans-serif;
     color: #333;
 }

@@ -13,7 +13,7 @@
     <div class="form-container mx-auto" style="max-width: 700px;">
         <h2 class="mb-4 text-center" th:text="${yogaClass.id != null} ? 'Edit Yoga Class' : 'New Yoga Class'"></h2>
 
-        <form th:action="@{/classes/save}" th:object="${yogaClass}" method="post" novalidate>
+        <form th:action="@{/classes/new}" th:object="${yogaClass}" method="post" novalidate>
             <input type="hidden" th:field="*{id}" />
 
             <!-- Title -->
