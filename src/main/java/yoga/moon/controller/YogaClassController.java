@@ -2,13 +2,14 @@ package yoga.moon.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.moon.model.YogaClass;
-import java.moon.repository.YogaClassRepository;
+import jakarta.validation.Valid;
+import yoga.moon.model.YogaClass;
+import yoga.moon.repository.YogaClassRepository;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @Controller
@@ -31,7 +32,7 @@ public class YogaClassController {
         return "class-detail";
     }
     @PostMapping("/classes")
-    public String saveClass(@Valid @ModelAtribute YogaClass yogaClass, BindingResult bindingResult, Model model){
+    public String saveClass(@Valid @ModelAttribute YogaClass yogaClass, BindingResult bindingResult, Model model){
         if(bindingResult.hasErrors()){
             return "class-form";
         }

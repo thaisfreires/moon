@@ -1,5 +1,8 @@
-package main.java.yoga.moon.model;
+package yoga.moon.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
 import jakarta.validation.constraints.*;
 import jakarta.persistence.*;
 

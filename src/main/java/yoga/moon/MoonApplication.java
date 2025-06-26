@@ -1,4 +1,4 @@
-package main.java.yoga.moon;
+package yoga.moon;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
