@@ -1,4 +1,4 @@
-package yoga.moon.model;
+package yoga.moon.dto;
 
 public class UserLoginForm {
     private String username;

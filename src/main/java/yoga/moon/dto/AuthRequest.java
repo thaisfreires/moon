@@ -1,4 +1,4 @@
-package yoga.moon.controller;
+package yoga.moon.dto;
 
 
 public class AuthRequest {
