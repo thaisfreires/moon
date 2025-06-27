@@ -30,7 +30,7 @@ public class UserController {
         model.addAttribute("user", user);
         return "user-detail";
     }
-    @PostMapping
+    @PostMapping("/new")
     public String saveUser(@Valid @ModelAttribute User user, BindingResult bindingResult, Model model){
         if(bindingResult.hasErrors()){
             return "user-form";
