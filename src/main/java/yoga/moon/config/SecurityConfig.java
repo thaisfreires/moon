@@ -6,7 +6,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,36 +17,32 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-
-import static org.springframework.security.config.Customizer.withDefaults;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private JwtFilter jwtFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/h2-console/**").permitAll()
-                // .requestMatchers("/login").permitAll()
-                .requestMatchers("/error").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers("/", "/public").permitAll()
-                .anyRequest().authenticated()
+            .requestMatchers("/auth", "/public", "/h2-console/**", "/error").permitAll()
+            .requestMatchers("/admin/**").hasRole("ADMIN")
+            .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+            .anyRequest().authenticated()
                 
             )
             
             .csrf(csrf -> csrf.disable())
-            .headers(headers -> headers
-            .frameOptions(frame -> frame.sameOrigin())
-            )
-            .formLogin(login -> login
-            .defaultSuccessUrl("/", true)
-            .permitAll())
-            .logout(withDefaults());
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+            .formLogin(AbstractHttpConfigurer::disable);
 
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);    
         return http.build();
     }
     @Bean
