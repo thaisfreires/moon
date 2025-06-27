@@ -49,7 +49,7 @@ public class AuthController {
         // Issue JWT, store it in session, or redirect somewhere
         String token = jwtUtil.generateToken(form.getUsername());
         model.addAttribute("token", token);
-        return "redirect:/"; 
+        return "redirect:/index"; 
 
     } catch (AuthenticationException e) {
         return "redirect:/login?error";
