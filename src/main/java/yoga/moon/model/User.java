@@ -1,14 +1,24 @@
 package yoga.moon.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
 import jakarta.validation.constraints.*;
 import jakarta.persistence.*;
-
+import yoga.moon.enums.*;
 
 @Entity
 public class User {
+
+    public User(String username,String password, String email, Role role){
+        this.username=username;
+        this.password=password;
+        this.email=email;
+        this.role=role;
+    }
+
+    public User(String email, String password){
+        this.email=email;
+        this.password=password;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,9 +37,26 @@ public class User {
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
+    
+    private Role role;
 
-    @NotNull
-    @NotBlank(message = "Age is required")
-    @Min(value = 18, message = "Age must be at least 18")
-    private String age;
+    public Long getId(){
+        return id;
+    }
+    public String getUsername(){
+        return username;
+    }
+    public String getPassword(){
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    public String getEmail(){
+        return email;
+    }
+    public Role getRole(){
+        return role;
+    }
+    
 }

@@ -2,95 +2,93 @@ package yoga.moon.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.UserDetails;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
+import yoga.moon.model.User;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.concurrent.TimeUnit;
 
 
 @Component
 public class JwtUtil {
 
-    // Use a securely generated key (at least 256 bits for HS256)
-    private final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    
-    // Configurable token expiration time (in milliseconds)
-    private static final long JWT_TOKEN_VALIDITY = 1000 * 60 * 60; // 1 hour
+    @Value("${SECRET_KEY}")
+    private String SECRET;
+    private final long ACCESS_TOKEN_VALIDITY_SECONDS = 3600;
+    private final String TOKEN_HEADER = "Authorization";
+    private final String TOKEN_PREFIX = "Bearer ";
 
-    // Generate a JWT token
-    public String generateToken(String username, Map<String, Object> extraClaims) {
-        if (username == null || username.trim().isEmpty()) {
-            throw new IllegalArgumentException("Username cannot be null or empty");
-        }
+    private JwtParser jwtParser;
+    private SecretKey key;
 
-        return Jwts.builder()
-                .setClaims(extraClaims)
-                .setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
-                .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+        this.jwtParser = Jwts.parser().verifyWith(key).build();
+    }
+
+    public String createToken(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("username", user.getUsername());
+        claims.put("roles", new String[] { user.getRole().name() });
+
+        Date tokenCreateTime = new Date();
+        Date tokenExpiration = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(ACCESS_TOKEN_VALIDITY_SECONDS));
+
+           return Jwts.builder()
+                .claims(claims)
+                .subject(user.getEmail())
+                .issuedAt(tokenCreateTime)
+                .expiration(tokenExpiration)
+                .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }
 
-    // Overloaded method for simple token generation without extra claims
-    public String generateToken(String username) {
-        return generateToken(username, new HashMap<>());
+    private Claims parseJwtClaims(String token) {
+        return jwtParser.parseSignedClaims(token).getPayload();
     }
 
-    // Extract username from token
-    public String extractUsername(String token) {
-        if (token == null || token.trim().isEmpty()) {
-            throw new IllegalArgumentException("Token cannot be null or empty");
-        }
-        return extractClaim(token, Claims::getSubject);
-    }
-
-    // Validate token
-    public boolean validateToken(String token, UserDetails userDetails) {
-        if (token == null || userDetails == null) {
-            return false;
-        }
+    public Claims resolveClaims(HttpServletRequest req) {
         try {
-            String username = extractUsername(token);
-            return username.equals(userDetails.getUsername()) && !isExpired(token);
-        } catch (JwtException | IllegalArgumentException e) {
-            return false; // Invalid token
+            String token = resolveToken(req);
+            if (token != null) {
+                return parseJwtClaims(token);
+            }
+            return null;
+        } catch (ExpiredJwtException ex) {
+            req.setAttribute("expired", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            req.setAttribute("invalid", ex.getMessage());
+            throw ex;
         }
     }
 
-    // Check if token is expired
-    private boolean isExpired(String token) {
-        return extractClaim(token, Claims::getExpiration).before(new Date());
-    }
 
-    // Generic method to extract claims
-    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
-    }
+    public String resolveToken(HttpServletRequest request) {
 
-    // Extract all claims from token
-    private Claims extractAllClaims(String token) {
-        try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(SECRET_KEY)
-                    .build()
-                    .parseClaimsJws(stripBearerPrefix(token))
-                    .getBody();
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new JwtException("Invalid or expired JWT token", e);
+        String bearerToken = request.getHeader(TOKEN_HEADER);
+        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
+            return bearerToken.substring(TOKEN_PREFIX.length());
         }
+        return null;
     }
 
-    // Remove "Bearer " prefix if present
-    private String stripBearerPrefix(String token) {
-        if (token != null && token.startsWith("Bearer ")) {
-            return token.substring(7);
-        }
-        return token;
+    public boolean validateClaims(Claims claims) {
+        return claims.getExpiration().after(new Date());
     }
+
+    public String getEmail(Claims claims) {
+        return claims.getSubject();
+    }
+    
 }
